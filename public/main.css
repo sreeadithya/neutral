@@ -1,0 +1,30 @@
+body *
+{
+   font-size: 20px !important;
+
+   
+}
+
+body {
+    margin: 3%;
+}
+
+textarea {
+    resize: none;
+    border: none;
+    outline: none;
+
+    width: 80%
+}
+
+input[type=checkbox] {
+    transform: scale(1.2);
+    padding: 0;
+    margin:0;
+    vertical-align: bottom;
+    position: relative;
+    top: -11px;
+    *overflow: hidden;
+    accent-color: #242424;
+
+}

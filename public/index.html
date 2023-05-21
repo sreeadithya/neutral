@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neutral</title>
+    <link rel="stylesheet" href="main.css">
+
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <script src="app.js"></script>
+
+</head>
+
+<body x-data="" @keydown.ctrl.space="document.getElementById('inputArea').style.display='block'; todoInputArea.focus()">
+
+<div x-data="{ todos: [], userInput: ''}" id="inputDiv" >
+
+  <form @submit.prevent="if(userInput.trim().length) todos.push({todo: userInput, completed: false, subtext: ''}); userInput = ''; document.getElementById('inputArea').style.display='none'; focusTodoText = true; focusTodoSubText = false" id="inputArea" style="display: none;" autocomplete="off">
+    <input type="text" x-model="userInput" id="todoInputArea">
+  </form>
+
+
+  <template x-data="" x-for="todo in todos" x-init="showSubText = false">
+    
+    <div>
+      <input type="checkbox" value="true" x-model="todo.completed" @click="todo.completed = ! todo.completed; console.log(todos)" >
+
+      <textarea x-text="todo.todo"  x-model="todo.todo" rows="1" @keydown.ctrl.d.prevent="todos = todos.filter((currTodo) => currTodo != todo)" ></textarea>
+  
+      <textarea x-text="todo.subtext" x-model="todo.subtext"
+      @keydown.ctrl.d.prevent="todos = todos.filter((currTodo) => currTodo != todo)"
+      @keydown.tab.prevent="todo.subtext += '    '"
+      x-bind:style="`height: ${todo.subtext.split('\n').length * 1.4}rem`"
+      x-init="todo.subtext = ''"
+      x-on:input="todo.subtext = $event.target.value"
+      >
+      </textarea>
+    </div>
+
+
+  </template>
+  
+</div>
+
+</body>
+</html

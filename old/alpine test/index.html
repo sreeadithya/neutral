@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-firestore.js"></script>
+
+
+
+    <script>
+        var firebaseConfig = {
+          apiKey: "AIzaSyDiOt7ARoxwb-m-3WEPafn3bUWHv1teeDQ",
+          authDomain: "neutral-eb0b1.firebaseapp.com",
+          projectId: "neutral-eb0b1",
+          storageBucket: "neutral-eb0b1.appspot.com",
+          messagingSenderId: "693038549846",
+          appId: "1:693038549846:web:19feb0dd9c1483457ca4f7",
+        };  
+      
+
+        
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth(app);
+        const db = firebase.firestore(app);
+      
+      
+
+
+      </script>
+
+      <script src="app.js" defer></script>
+
+      <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+
+      <link rel="stylesheet" href="main.css">
+      
+      
+</head>
+
+
+<body>
+
+  <section id="whenSignedOut" x-data="" style="display: none;">
+
+    <span class="homePageText" x-data="{ welcomeText: getWelcomeText() }" x-text="welcomeText"></span>
+    <span class="homePageText" id="mainText">
+    welcome to <b>neutral.</b> the most lightweight and stripped down version of a todo list app you can find. <br><br>
+    most todo apps have beautiful user interfaces and have a ton of features. i absolutely love that but i think it’s quite
+    unproductive if a user gets distracted when they just want to come in, type what they need, look at their tasks and leave immediately.
+    this is an app that i have built based on my specific requirements and nothing more. i feel this is perfectly geared towards students
+    and power users that just want to get things done very efficiently without having to setup much. <br><br>
+    designed with keyboard usage in mind so you’ll basically never have to touch the mouse and has a very low-key yet tasteful user interface. 
+    </span>
+
+    <button id="logInButton" x-data="provider = new firebase.auth.GoogleAuthProvider() " x-on:click="auth.signInWithPopup(provider)"> <u>log in</u> </button> 
+
+    <div id="bottomElements">
+    <span class="homePageText" >use in your browser by logging in here or download the android or windows app.</span>
+    <span class="homePageText">made by translate</span>
+    </div>
+
+
+  </section>
+  
+
+  <section id="whenSignedIn" x-data="" style="display: none;">
+
+    <div id="userDetails">
+    </div>
+
+    <button id="signOutButton" x-data="" x-on:click="auth.signOut()">sign out</button>
+
+    <ul id="dataList">
+
+    </ul>
+
+  </section>
+
+  
+</body>
+</html>

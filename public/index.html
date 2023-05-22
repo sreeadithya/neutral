@@ -1,197 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>neutral</title>
-    <link rel="stylesheet" href="main.css">
-
-    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/cdn.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="app.js"></script>
-
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>neutral</title>
+  <link rel="stylesheet" href="main.css">
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/cdn.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="app.js" type="module"></script>
+  
 </head>
 
 <body x-data="" @keydown.ctrl.space="document.getElementById('inputArea').style.display='block'; todoInputArea.focus()">
-
-<section id="whenSignedOut" >
-  <span class="homePageText" x-data="{ welcomeText: getWelcomeText() }" x-text="welcomeText"></span>
-  <span class="homePageText" id="mainText">
-  welcome to <b>neutral.</b> the most lightweight and stripped down version of a todo list app you can find. <br><br>
-  most todo apps have beautiful user interfaces and have a ton of features. i absolutely love that but i think it’s quite
-  unproductive if a user gets distracted when they just want to come in, type what they need, look at their tasks and leave immediately.
-  this is an app that i have built based on my specific requirements and nothing more. i feel this is perfectly geared towards students
-  and power users that just want to get things done very efficiently without having to setup much. <br><br>
-  designed with keyboard usage in mind so you’ll basically never have to touch the mouse and has a very low-key yet tasteful user interface. 
-  </span>
-
-  <form id="inputFields">
-
-  <input id="userEmailField" type="email"  placeholder="email">
-  <input id="userPasswordField" type="password"  placeholder="password">
-
-  <button id="signInButton" >sign in</button> 
-  <button id="signUpButton">sign up</button>
-
-  </form>
-
-  <div id="bottomElements">
-  <span class="homePageText" >use in your browser by logging in here or download the android or windows app.</span>
-  <span class="homePageText">made by translate</span>
-  </div>
-</section>
-
-
-<section x-data="{ todos: [], userInput: ''}" id="whenSignedIn" style="display: none;">
-
-  <div id="userDetails">
-  </div>
-
-  <ul id="dataList">
-
-  </ul>
-
-  <div id="user-info"></div>
-
-  <button id="signOutButton"> sign out </button>
-  <form @submit.prevent="if(userInput.trim().length) todos.push({todo: userInput, completed: false, subtext: '', showSubText: false}); userInput = ''; document.getElementById('inputArea').style.display='none'; focusTodoText = true; focusTodoSubText = false" id="inputArea" style="display: none;" autocomplete="off">
-    <input type="text" x-model="userInput" id="todoInputArea">
-  </form>
-
-
-  <template x-data="todos" x-for="todo in todos">
-    
-    <div>
-      <input type="checkbox" value="true" x-model="todo.completed" @click="todo.completed = ! todo.completed; console.log(todos)" >
-
-      <textarea x-text="todo.todo"  x-model="todo.todo" rows="1" @keydown.ctrl.d.prevent="todos = todos.filter((currTodo) => currTodo != todo)"
-      @keydown.enter.prevent="todo.showSubText = true"
-      ></textarea>
   
+  <section id="whenSignedOut" >
+    <span class="homePageText" x-data="{ welcomeText: getWelcomeText() }" x-text="welcomeText"></span>
+    <p class="homePageText" id="mainText">
+      welcome to <b>neutral.</b> the most lightweight and stripped down version of a todo list app you can find. <br><br>
+      most todo apps have beautiful user interfaces and have a ton of features. i absolutely love that but i think it’s quite
+      unproductive if a user gets distracted when they just want to come in, type what they need, look at their tasks and leave immediately.
+      this is an app that i have built based on my specific requirements and nothing more. i feel this is perfectly geared towards students
+      and power users that just want to get things done very efficiently without having to setup much. <br><br>
+      designed with keyboard usage in mind so you’ll basically never have to touch the mouse and has a very low-key yet tasteful user interface. 
+    </p>
+    
+    <form id="inputFields">
+      
+      <input id="userEmailField" type="email"  placeholder="email">
+      
+      <button id="enterButton">enter</button> 
+
+      
+    </form>
+    
+    <p id="verificationLinkSent" class="alertMessages" style="display: none">a verification link has <br> been sent to your email</p>
+    <p id="emailInvalidFormat" class="alertMessages" style="display: none">the email entered is invalid</p>
 
 
-      <textarea x-text="todo.subtext" x-model="todo.subtext"
-      @keydown.ctrl.d.prevent="todos = todos.filter((currTodo) => currTodo != todo)"
-      @keydown.tab.prevent="todo.subtext += '    '"
-      x-bind:style="`height: ${todo.subtext.split('\n').length * 3.5}vh`"
-      x-init="todo.subtext = ''"
-      x-on:input="todo.subtext = $event.target.value"
-      x-show="todo.showSubText"
-      class="subText"
-      @keydown.backspace="if(todo.subtext == '') todo.showSubText=false"
-      >
-      </textarea>
-
+    <div id="bottomElements">
+      <p class="homePageText" >use in your browser by logging in here or download the android or windows app.</p>
+      <p id="bottomElementsCredit" class="homePageText">made by translate</p>
     </div>
 
-
-  </template>
+  </section>
   
-</section>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-  import {
-        getAuth,
-        createUserWithEmailAndPassword,
-        signInWithEmailAndPassword,
-        onAuthStateChanged,
-        signOut
-    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBVRnJfrP4-VHoIHl0SFJSqSkdXT6Q3cXY",
-    authDomain: "neutral-fd231.firebaseapp.com",
-    projectId: "neutral-fd231",
-    storageBucket: "neutral-fd231.appspot.com",
-    messagingSenderId: "279993688340",
-    appId: "1:279993688340:web:4905f1d9fecb0e8d5c6201"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app)
-
-  const userEmailField = document.querySelector("#userEmailField");
-  const userPasswordField = document.querySelector("#userPasswordField");
-  const whenSignedOut = document.querySelector("#whenSignedOut");
-  const whenSignedIn = document.querySelector("#whenSignedIn");
-  const signUpButton = document.querySelector("#signUpButton");
-  const signInButton = document.querySelector("#signInButton");
-  const signOutButton = document.querySelector("#signOutButton");
-
-    const userSignUp = async() => {
-      console.log('lmao the beginning')
-              const signUpEmail = userEmailField.value;
-              const signUpPassword = userPasswordField.value;
-              
-              createUserWithEmailAndPassword(auth, signUpEmail, signUpPassword)
-              .then((userCredential) => {
-                  const user = userCredential.user;
-                  console.log(user);
-                  alert("Your account has been created!");
-              })
-              .catch((error) => {
-                  const errorCode = error.code;
-                  const errorMessage = error.message;
-                  console.log(errorCode + errorMessage)
-              })
-          }
-      
-    const userSignIn = async() => {
-      console.log('lmao rises')
-      const signInEmail = userEmailField.value;
-      const signInPassword = userPasswordField.value;
-      
-      signInWithEmailAndPassword(auth, signInEmail, signInPassword)
-      .then((userCredential) => {
-          const user = userCredential.user;
-          console.log(user);
-          alert("Logged in bros!");
-      })
-      .catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          console.log(errorCode + errorMessage)
-      })
-    }
-
-    const checkAuthState = async() => {
-            onAuthStateChanged(auth, user => {
-                if(user) {
-                    whenSignedOut.style.display = 'none';
-                    whenSignedIn.style.display = 'block';
-                }
-                else {
-                    whenSignedOut.style.display = 'block';
-                    whenSignedIn.style.display = 'none';
-                }
-            })
-        }
+  
+  <section x-data="{ todos: [], userInput: ''}" id="whenSignedIn" style="display: none;">
     
-    checkAuthState()
-
-    const userSignOut = async() => {
-            await signOut(auth);
-        }
-
-      signUpButton.addEventListener('click', (event) => {
-        event.preventDefault(); 
-        userSignUp();
-      });
-
-      signInButton.addEventListener('click', (event) => {
-        event.preventDefault(); 
-        userSignIn();
-      });
-
-      signOutButton.addEventListener('click', (event) => {
-        event.preventDefault(); 
-        userSignOut();
-      });
-
-
-</script>
-
+    <div id="userDetails">
+    </div>
+    
+    <ul id="dataList">
+      
+    </ul>
+    
+    <div id="user-info"></div>
+    
+    <button id="signOutButton"> sign out </button>
+    <form @submit.prevent="if(userInput.trim().length) todos.push({todo: userInput, completed: false, subtext: '', showSubText: false}); userInput = ''; document.getElementById('inputArea').style.display='none'; focusTodoText = true; focusTodoSubText = false" id="inputArea" style="display: none;" autocomplete="off">
+      <input type="text" x-model="userInput" id="todoInputArea">
+    </form>
+    
+    
+    <template x-data="todos" x-for="todo in todos">
+      
+      <div>
+        <input type="checkbox" value="true" x-model="todo.completed" @click="todo.completed = ! todo.completed; console.log(todos)" >
+        
+        <textarea x-text="todo.todo"  x-model="todo.todo" rows="1" @keydown.ctrl.d.prevent="todos = todos.filter((currTodo) => currTodo != todo)"
+          @keydown.enter.prevent="todo.showSubText = true"
+          ></textarea>
+          
+          
+          
+          <textarea x-text="todo.subtext" x-model="todo.subtext"
+          @keydown.ctrl.d.prevent="todos = todos.filter((currTodo) => currTodo != todo)"
+          @keydown.tab.prevent="todo.subtext += '    '"
+          x-bind:style="`height: ${todo.subtext.split('\n').length * 3.5}vh`"
+          x-init="todo.subtext = ''"
+          x-on:input="todo.subtext = $event.target.value"
+          x-show="todo.showSubText"
+          class="subText"
+          @keydown.backspace="if(todo.subtext == '') todo.showSubText=false"
+          >
+        </textarea>
+        
+      </div>
+      
+      
+    </template>
+    
+  </section>
+  
+  <script >
+    function getWelcomeText() {
+      const now = new Date();
+      const hours = now.getHours();
+      
+      if (hours >= 5 && hours < 12) {
+        return 'good morning';
+      }
+      else if (hours >= 12 && hours < 18) {
+        return 'good afternoon';
+      }
+      else {
+        return 'good evening';
+      }
+    }
+  </script>
 </body>
 </html

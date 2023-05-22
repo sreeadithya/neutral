@@ -7,9 +7,11 @@
   <title>neutral</title>
   <link rel="stylesheet" href="main.css">
   
+
   <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.x.x/dist/cdn.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <script src="app.js" type="module"></script>
+  
+  <script src="app.js" ></script>
   
 </head>
 
@@ -27,16 +29,11 @@
     </p>
     
     <form id="inputFields">
-      
-      <input id="userEmailField" type="email"  placeholder="email">
-      
-      <button id="enterButton">enter</button> 
+            
+      <button id="logInButton">log in</button> 
 
       
     </form>
-    
-    <p id="verificationLinkSent" class="alertMessages" style="display: none">a verification link has <br> been sent to your email</p>
-    <p id="emailInvalidFormat" class="alertMessages" style="display: none">the email entered is invalid</p>
 
 
     <div id="bottomElements">
@@ -94,21 +91,82 @@
     
   </section>
   
-  <script >
-    function getWelcomeText() {
-      const now = new Date();
-      const hours = now.getHours();
-      
-      if (hours >= 5 && hours < 12) {
-        return 'good morning';
-      }
-      else if (hours >= 12 && hours < 18) {
-        return 'good afternoon';
-      }
-      else {
-        return 'good evening';
-      }
-    }
-  </script>
+
+
+
+
+
+
+
+  
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBVRnJfrP4-VHoIHl0SFJSqSkdXT6Q3cXY",
+    authDomain: "neutral-fd231.firebaseapp.com",
+    projectId: "neutral-fd231",
+    storageBucket: "neutral-fd231.appspot.com",
+    messagingSenderId: "279993688340",
+    appId: "1:279993688340:web:4905f1d9fecb0e8d5c6201"
+  };
+
+  const firebaseApp = firebase.initializeApp(firebaseConfig);
+  const db = firebaseApp.firestore();
+  const auth = firebaseApp.auth();
+  const provider = new firebase.auth.GoogleAuthProvider();
+  
+const logInButton = document.querySelector("#logInButton");
+
+const signOutButton = document.querySelector("#signOutButton");
+
+signOutButton.addEventListener('click', (event) => {
+event.preventDefault(); 
+auth.signOut()
+  .then(() => {
+    console.log("User signed out");
+  })
+  .catch((error) => {
+    console.error("Signout error:", error);
+  });
+});
+
+
+logInButton.addEventListener('click', (event) => {
+event.preventDefault(); 
+firebase.auth().signInWithPopup(provider)
+  .then((result) => {
+    console.log("User signed in:", result.user);
+  })
+  .catch((error) => {
+    console.error("Authentication error:", error);
+  });
+
+});
+
+
+auth.onAuthStateChanged(user => {
+if (user) {
+    var userLoggedIn = true;
+    console.log(userLoggedIn)
+    document.getElementById('whenSignedOut').style.display = 'none'
+    document.getElementById('whenSignedIn').style.display = 'block'
+
+
+ 
+} 
+else {
+
+    var userLoggedIn = false;
+    console.log(userLoggedIn)
+    document.getElementById('whenSignedOut').style.display = 'flex'
+    document.getElementById('whenSignedIn').style.display = 'none'
+
+}
+});
+
+
+</script>
 </body>
 </html

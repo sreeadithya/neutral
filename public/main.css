@@ -20,13 +20,6 @@ textarea {
 
 
 
-.alertMessages {
-    font-size: 16px ;
-    color: #B0B0B0;
-    padding-top: 10px;
-    position: absolute;
-}
-
 .subText {
     padding-left: 4%;
 }
@@ -43,12 +36,15 @@ input[type=checkbox] {
     
 }
 
-input[type="email"], #enterButton {
+ #logInButton {
     
     outline: none;
     border-color: #B0B0B0;
     border-width: 2px;
     border-style: solid;
+    width: auto;
+    cursor: pointer;
+    background-color: #FFFFFF;
 }
 
 
@@ -65,13 +61,6 @@ input[type="email"], #enterButton {
     flex-direction: row;
 }
 
-
-#enterButton{
-    margin-left: 10px;
-    width: auto;
-    cursor: pointer;
-    background-color: #FFFFFF;
-}
 
 #mainText {
     padding-top: 12vh;

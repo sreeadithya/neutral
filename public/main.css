@@ -6,7 +6,8 @@ body *
 }
 
 body {
-    margin: 3%;
+    margin: 5%;
+
 }
 
 textarea {
@@ -31,4 +32,49 @@ input[type=checkbox] {
     *overflow: hidden;
     accent-color: #242424;
 
+}
+
+input[type="password"], input[type="email"], #signInButton, #signUpButton {
+    
+    outline: none;
+    border-color: #B0B0B0;
+    border-width: 2px;
+    border-style: solid;
+  }
+  
+
+#whenSignedOut {
+    display: flex;
+    flex-direction: column;
+}
+
+#inputFields {
+    width: 20%;
+    background-color: #FFFFFF;
+    display: flex;
+    flex-direction: row;
+}
+
+#userEmailField, #userPasswordField, #signInButton, #signUpButton {
+    margin-right: 5%;
+    background-color: #FFFFFF;
+}
+
+#signInButton, #signUpButton{
+    margin-left: auto;
+    margin-right: 0;
+    width: 30%;
+    cursor: pointer;
+}
+
+#mainText {
+    padding-top: 5%;
+    padding-bottom: 5%;
+}
+
+#bottomElements {
+    padding-top: 15%;
+    display: inline-flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
 }

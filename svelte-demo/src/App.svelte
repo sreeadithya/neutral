@@ -116,155 +116,31 @@
 				whenSignedInDisplay = 'flex'
 				displayName = user.displayName
 				userId = user.uid
-				console.log(userId)
-				async function initTodos() {
-					const todosCollectionRef = collection(db, 'users', userId, 'todos');
-					const querySnapshot = await getDocs(todosCollectionRef);
+				console.log(userId) }
+				
+				
+				else {
+					var userLoggedIn = false;
+					console.log('user logged in' + userLoggedIn)
+					whenSignedOutDisplay = 'flex'
+					whenSignedInDisplay = 'none'
+					userId = null
 					
-					todos = querySnapshot.docs.map((doc) => doc.data());
-					
-					// Subscribe to changes using onSnapshot and update todos array
-					unsubscribe = onSnapshot(querySnapshot, (snapshot) => {
-						snapshot.docChanges().forEach((change) => {
-							const { newIndex, oldIndex, doc } = change;
-							const todo = doc.data();
-							
-							if (change.type === 'added') {
-								todos.splice(newIndex, 0, todo);
-							} else if (change.type === 'modified') {
-								todos.splice(oldIndex, 1, todo);
-							} else if (change.type === 'removed') {
-								todos.splice(oldIndex, 1);
-							}
-						});
-					});
 				}
-				initTodos()
-				
-				
-				
-			}
-			else {
-				var userLoggedIn = false;
-				console.log('user logged in' + userLoggedIn)
-				whenSignedOutDisplay = 'flex'
-				whenSignedInDisplay = 'none'
-				userId = null
-				
-			}
-		});
-		
-		
-		
-		
-		// Function to unsubscribe from the Firestore listener
-		function unsubscribeFromTodos() {
-			if (unsubscribe) {
-				unsubscribe();
-				unsubscribe = undefined;
-			}
-		}
-		
-		
-		let timeoutId; // Variable to store the timeout ID
-		
-		afterUpdate(() => {
+			});
 			
-			timeoutId = setTimeout(unsubscribeFromTodos, 5000); // Unsubscribe after approximately 5 seconds
 			
-		});
-		
-		onDestroy(() => {
-			clearTimeout(timeoutId); // Clear the timeout if the component is being destroyed before the timeout triggers
-			unsubscribeFromTodos(); // Invoke unsubscribeFromTodos to ensure proper cleanup
-		});
-		
-		
-		async function addEmptyTodo() {
-			todos = [
-			...todos,
-			{ todo: '', completed: false, subtext: '', showSubText: 'none' }
-			];
-			const newIndex = todos.length - 1;
-			const todoRef = doc(db, 'users', userId, 'todos', newIndex.toString());
-			await setDoc(todoRef, todos[newIndex]);
-		}
-		
-		
-		
-		
-		async function handleTodoCompleted(index, event) {
-			if (index >= 0 && index < todos.length) {
-				todos[index].completed = event.target.checked;
-				const todoRef = doc(db, 'users', userId, 'todos', index.toString());
-				await updateDoc(todoRef, { completed: event.target.checked });
-			}
-		}
-		
-		async function handleTodoInput(index, event) {
-			if (index >= 0 && index < todos.length) {
-				todos[index].todo = event.target.value;
-				const todoRef = doc(db, 'users', userId, 'todos', index.toString());
-				const docSnap = await getDoc(todoRef);
-				if (docSnap.exists()) {
-					await updateDoc(todoRef, { todo: event.target.value });
-				} else {
-					await setDoc(todoRef, { todo: event.target.value });
-				}
-				
-				if (index >= 0 && index < todos.length) {
-					todos[index].todo = event.target.value;
-					const todoRefSub = doc(db, 'users', userId, 'todos', index.toString());
-					const docSnapSub = await getDoc(todoRefSub);
-					if (docSnapSub.exists()) {
-						await updateDoc(todoRef, { showSubText: 'block' });
-					} else {
-						await setDoc(todoRef, { showSubText: 'none' });
-					}
-				}
-			}}
 			
-			async function handleSubtextInput(index, event) {
-				if (index >= 0 && index < todos.length) {
-					todos[index].subtext = event.target.value;
-					const todoRef = doc(db, 'users', userId, 'todos', index.toString());
-					const docSnap = await getDoc(todoRef);
-					if (docSnap.exists()) {
-						await updateDoc(todoRef, { subtext: event.target.value });
-						await update(todoRef, { showSubText: 'block' });
-					} else {
-						await setDoc(todoRef, { subtext: event.target.value });
-						await setDoc(todoRef, { showSubText: 'block' });
-					}
-				}
+			
+			function addTodo() {
+				todos = [...todos, {todo:'', completed: false, subtext: '', showSubText: 'none'}]
+				console.log(user)
 			}
 			
 			
-			async function handleShowSubText(index, value) {
-				if (index >= 0 && index < todos.length) {
-					todos[index].showSubText = value;
-					const todoRef = doc(db, 'users', userId, 'todos', index.toString());
-					await updateDoc(todoRef, { showSubText: value });
-				}
+			function removeTodo(index) {
+				todos = [...todos.slice(0, index), ...todos.slice(index+1)]
 			}
-			
-			
-			async function handleTodoDelete(index) {
-				console.log('deleted!');
-				
-				if (index >= 0 && index < todos.length) {
-					const deletedSubtext = todos[index].subtext; // Store the subtext to be deleted
-					
-					const todoRef = doc(db, 'users', userId, 'todos', index.toString());
-					const docSnap = await getDoc(todoRef);
-					if (docSnap.exists()) {
-						await deleteDoc(todoRef);
-					}
-				}
-				
-			}
-			
-			
 			
 			
 			
@@ -287,7 +163,7 @@
 			
 			function handleKeyDown(event) {
 				if (event.ctrlKey && event.code === 'Space') {
-					addEmptyTodo();
+					addTodo();
 				}
 				
 				if (event.ctrlKey && event.code === 'KeyO') {
@@ -324,7 +200,6 @@
 				if (event.ctrlKey && event.code === 'KeyC') {
 					event.preventDefault()
 					console.log(todos)
-					console.log(userSettings)
 				}
 				
 				
@@ -364,37 +239,35 @@
 					<div class="todoAndCheckBox">
 						<label class="checkBoxContainer">
 							<input class="checkBox" type="checkbox" bind:checked={completed}
-							on:change={(event) => handleTodoCompleted(index, event)}
+							
 							value=true>
 							<span class="checkBoxIndicator"></span>
 						</label>
 						<!-- svelte-ignore a11y-autofocus -->
-						<textarea class="todos" autofocus type="text" bind:this={todos.input} bind:value={todo}
-						on:input={(event) => handleTodoInput(index, event)}  use:shortcut={{
-							
+						<textarea class="todos" autofocus type="text" bind:this={todos.input} bind:value={todo} use:shortcut={{
+
 							control: true,
 							code: 'KeyD',
-							callback: () => handleTodoDelete(index),
-							
+							callback: () => removeTodo(index),
+	
 							code2: 'Enter',
-							callback2: (event) => {
-								handleShowSubText(index, 'block');
-								
+							callback2: () => {
+								showSubText = 'block'
 							},
-							
+	
 							code4: 'Backspace',
 							callback4: () => {
 								if (todo === '') {
-									
+									removeTodo(index)
 								}
 							},
 							shift: true,
 							callback5: () => {
 								todo = todo + '\n'
 							},
-							
+	
 							todo: todo
-							
+	
 						}} on:input={autoGrow}></textarea>
 					</div>
 					
@@ -402,21 +275,22 @@
 					
 					<textarea
 					on:input={autoGrow}
-					on:input={(event) => handleSubtextInput(index, event)}
+					
 					class="subText"
 					type="text"
 					bind:value={subtext}
 					placeholder="subtext"
 					style="display: {showSubText}"
+					
 					use:shortcut={{
 						code3: 'Backspace',
 						callback3: () => {
 							if (subtext === '') {
-								handleShowSubText(index, 'none');
+								showSubText = 'none';
 							}
 						},
-						subtext: subtext,
-					}}></textarea>
+						subtext: subtext
+					}} wrap="hard"></textarea>
 					
 					
 					

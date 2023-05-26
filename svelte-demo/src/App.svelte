@@ -1,364 +1,321 @@
 <script>
-	import { initializeApp } from "firebase/app";
-	import {
-		getAuth,
-		signInWithPopup,
-		GoogleAuthProvider } from "firebase/auth";
-		import { getFirestore, collection, doc, updateDoc, setDoc, getDocs, getDoc, onSnapshot, deleteDoc } from "firebase/firestore";
+	
+	
+	
+	import { shortcut } from "./misc";
+	import { onMount } from "svelte";
+	
+	
+	import { Client, Account, ID } from 'appwrite';
+	
+	const client = new Client()
+	.setEndpoint('http://localhost:8080/?') // Your API Endpoint
+	.setProject('646f39a2a5fcf37e74b2');               // Your project ID
+	
+	const account = new Account(client);
+	
+	const promise = account.createMagicURLSession(ID.unique(), 'email@example.com');
+	
+	promise.then(function (response) {
+		console.log(response);
+	}, function (error) {
+		console.log(error);
+	});
+	
+	
+	
+	let displayName
+	let todos = [];
+	
+	
+	
+	
+	let whenSignedOutDisplay = 'flex'
+	let whenSignedInDisplay = 'none'
+	let showSubText = 'none'
+	let showMenuItems = 'none'
+	let showShortcuts = 'none'
+	
+	
+	function getWelcomeText() {
+		const now = new Date();
+		const hours = now.getHours();
 		
-		import { getPerformance } from "firebase/performance";
-		
-		import { shortcut } from "./misc.js"
-		import { onMount, onDestroy, afterUpdate } from 'svelte';
-		
-		const firebaseConfig = {
-			apiKey: "AIzaSyBVRnJfrP4-VHoIHl0SFJSqSkdXT6Q3cXY",
-			authDomain: "neutral-fd231.firebaseapp.com",
-			projectId: "neutral-fd231",
-			storageBucket: "neutral-fd231.appspot.com",
-			messagingSenderId: "279993688340",
-			appId: "1:279993688340:web:4905f1d9fecb0e8d5c6201"
+		if (hours >= 5 && hours < 12) {
+			return 'good morning';
+		}
+		else if (hours >= 12 && hours < 18) {
+			return 'good afternoon';
+		}
+		else {
+			return 'good evening';
+		}
+	}
+	
+	
+	let showUserName = 'block'
+	showUserName = JSON.parse(localStorage.getItem('showUserName'))
+	
+	var isDarkModeStorage = JSON.parse(localStorage.getItem('isDarkModeStorage'))
+	let isDarkMode
+	if (isDarkModeStorage == true) {
+		isDarkMode = true;
+		window.document.body.classList.toggle('darkMode')
+	}
+	else {
+		isDarkMode = false;
+	}
+	
+	var isBlurStorage = JSON.parse(localStorage.getItem('isBlurStorage'))		
+	let isBlur
+	if (isBlurStorage == 5) {
+		isBlur = 5
+	}
+	else {
+		isBlur = 0
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	function addTodo() {
+		todos = [...todos, {todo:'', completed: false, subtext: '', showSubText: 'none'}]
+		console.log(user)
+	}
+	
+	
+	function removeTodo(index) {
+		todos = [...todos.slice(0, index), ...todos.slice(index+1)]
+	}
+	
+	
+	
+	
+	
+	function autoGrow(event) {
+		const element = event.target;
+		element.style.height = '5px';
+		element.style.height = element.scrollHeight + 'px';
+	}
+	
+	
+	
+	onMount(() => {
+		document.addEventListener('keydown', handleKeyDown);
+		return () => {
+			document.removeEventListener('keydown', handleKeyDown);
 		};
+	});
+	
+	function handleKeyDown(event) {
+		if (event.ctrlKey && event.code === 'Space') {
+			addTodo();
+		}
 		
-		const app = initializeApp(firebaseConfig);
-		
-		let unsubscribe
-		const auth = getAuth(app)
-		const provider = new GoogleAuthProvider(app);
-		const user = auth.currentUser;
-		const perf = getPerformance(app);
-		const db = getFirestore(app);
-		
-		const colRef = collection(db, "data")
-		
-		let userId = null;
-		let displayName
-		let todos = [];
-		
-		let whenSignedOutDisplay = 'none'
-		let whenSignedInDisplay = 'none'
-		let showSubText = 'none'
-		let showMenuItems = 'none'
-		let showShortcuts = 'none'
-		
-		
-		function getWelcomeText() {
-			const now = new Date();
-			const hours = now.getHours();
+		if (event.ctrlKey && event.code === 'KeyO') {
+			event.preventDefault()
+			if (showUserName == 'block') {
+				showUserName = 'none'
+				window.localStorage.setItem('showUserName', JSON.stringify(showUserName))
+			}
+			else if (showUserName == 'none') {
+				showUserName = 'block'
+				window.localStorage.setItem('showUserName', JSON.stringify(showUserName))
+			}
 			
-			if (hours >= 5 && hours < 12) {
-				return 'good morning';
-			}
-			else if (hours >= 12 && hours < 18) {
-				return 'good afternoon';
-			}
-			else {
-				return 'good evening';
-			}
 		}
 		
 		
-		let showUserName = 'block'
-		showUserName = JSON.parse(localStorage.getItem('showUserName'))
-		
-		var isDarkModeStorage = JSON.parse(localStorage.getItem('isDarkModeStorage'))
-		let isDarkMode
-		if (isDarkModeStorage == true) {
-			isDarkMode = true;
+		if (event.ctrlKey && event.code === 'KeyM') {
 			window.document.body.classList.toggle('darkMode')
+			isDarkMode = !isDarkMode
+			localStorage.setItem("isDarkModeStorage", isDarkMode)
 		}
-		else {
-			isDarkMode = false;
-		}
-		
-		var isBlurStorage = JSON.parse(localStorage.getItem('isBlurStorage'))		
-		let isBlur
-		if (isBlurStorage == 5) {
-			isBlur = 5
-		}
-		else {
-			isBlur = 0
-		}
-		
-		
-		
-		
-		
-		
-		function logInButton() {
-			signInWithPopup(auth, provider)
-			.then((result) => {
-				whenSignedOutDisplay = 'none'
-				whenSignedInDisplay = 'flex'
-			})
-			.catch((error) => {
-				console.error("Authentication error:", error);
-			});
-		}
-		
-		function signOutButton() {
-			auth.signOut()
-			.then(() => {
-				whenSignedOutDisplay = 'flex'
-				whenSignedInDisplay = 'none'
-			})
-			.catch((error) => {
-				console.error("Signout error:", error);
-			});
-		}
-		
-		
-		auth.onAuthStateChanged(user => {
-			if (user) {
-				var userLoggedIn = true;
-				console.log('user logged in' + userLoggedIn)
-				whenSignedOutDisplay = 'none'
-				whenSignedInDisplay = 'flex'
-				displayName = user.displayName
-				userId = user.uid
-				console.log(userId) }
-				
-				
-				else {
-					var userLoggedIn = false;
-					console.log('user logged in' + userLoggedIn)
-					whenSignedOutDisplay = 'flex'
-					whenSignedInDisplay = 'none'
-					userId = null
-					
-				}
-			});
-			
-			
-			
-			
-			function addTodo() {
-				todos = [...todos, {todo:'', completed: false, subtext: '', showSubText: 'none'}]
-				console.log(user)
+		if (event.ctrlKey && event.code === 'KeyB') {
+			event.preventDefault()
+			if (isBlur == 0) {
+				isBlur = 5
+				localStorage.setItem("isBlurStorage", isBlur)
 			}
-			
-			
-			function removeTodo(index) {
-				todos = [...todos.slice(0, index), ...todos.slice(index+1)]
+			else if (isBlur == 5) {
+				isBlur = 0
+				localStorage.setItem("isBlurStorage", isBlur)
 			}
-			
-			
-			
-			
-			
-			function autoGrow(event) {
-				const element = event.target;
-				element.style.height = '5px';
-				element.style.height = element.scrollHeight + 'px';
-			}
-			
-			
-			
-			onMount(() => {
-				document.addEventListener('keydown', handleKeyDown);
-				return () => {
-					document.removeEventListener('keydown', handleKeyDown);
-				};
-			});
-			
-			function handleKeyDown(event) {
-				if (event.ctrlKey && event.code === 'Space') {
-					addTodo();
-				}
-				
-				if (event.ctrlKey && event.code === 'KeyO') {
-					event.preventDefault()
-					if (showUserName == 'block') {
-						showUserName = 'none'
-						window.localStorage.setItem('showUserName', JSON.stringify(showUserName))
-					}
-					else if (showUserName == 'none') {
-						showUserName = 'block'
-						window.localStorage.setItem('showUserName', JSON.stringify(showUserName))
-					}
-					
-				}
-				
-				
-				if (event.ctrlKey && event.code === 'KeyM') {
-					window.document.body.classList.toggle('darkMode')
-					isDarkMode = !isDarkMode
-					localStorage.setItem("isDarkModeStorage", isDarkMode)
-				}
-				if (event.ctrlKey && event.code === 'KeyB') {
-					event.preventDefault()
-					if (isBlur == 0) {
-						isBlur = 5
-						localStorage.setItem("isBlurStorage", isBlur)
-					}
-					else if (isBlur == 5) {
-						isBlur = 0
-						localStorage.setItem("isBlurStorage", isBlur)
-					}
-				}
-				
-				if (event.ctrlKey && event.code === 'KeyC') {
-					event.preventDefault()
-					console.log(todos)
-				}
-				
-				
-			}
-		</script>
+		}
 		
-		<main style="filter: blur({isBlur}px);">
-			<section id="whenSignedOut" style="display: {whenSignedOutDisplay};">
-				<span class="homePageText">{getWelcomeText()}</span>
-				<p class="homePageText" id="mainText" >
-					welcome to <b>neutral.</b> the most lightweight and stripped down version of a todo list app you can find. <br><br>
-					most todo apps have beautiful user interfaces and have a ton of features. i absolutely love that but i think it’s quite
-					unproductive if a user gets distracted when they just want to come in, type what they need, look at their tasks and leave immediately.
-					this is an app that i have built based on my specific requirements and nothing more. i feel this is perfectly geared towards students
-					and power users that just want to get things done very efficiently without having to setup much. <br><br>
-					designed with keyboard usage in mind so you’ll basically never have to touch the mouse and has a very low-key yet tasteful user interface.
-				</p>
-				
-				
-				<button id="logInButton" on:click|preventDefault={logInButton}>log in</button>
-				
-				
-				
-				<div id="bottomElements">
-					<p class="homePageText" >use in your browser by logging in here or download the android or windows app.</p>
-					<p id="bottomElementsCredit" class="homePageText">made by translate</p>
-				</div>
-				
-			</section>
-			
-			
-			<section id="whenSignedIn" style="display: {whenSignedInDisplay};">
-				
-				<div id="leftSide">
-					{#each todos as {todo, completed, subtext, showSubText}, index}
-					
-					<div class="todoAndCheckBox">
-						<label class="checkBoxContainer">
-							<input class="checkBox" type="checkbox" bind:checked={completed}
-							
-							value=true>
-							<span class="checkBoxIndicator"></span>
-						</label>
-						<!-- svelte-ignore a11y-autofocus -->
-						<textarea class="todos" autofocus type="text" bind:this={todos.input} bind:value={todo} use:shortcut={{
+		if (event.ctrlKey && event.code === 'KeyC') {
+			event.preventDefault()
+			console.log(todos)
+		}
+		
+		
+	}
+</script>
 
-							control: true,
-							code: 'KeyD',
-							callback: () => removeTodo(index),
+<main style="filter: blur({isBlur}px);">
+	<section id="whenSignedOut" style="display: {whenSignedOutDisplay};">
+		<span class="homePageText">{getWelcomeText()}</span>
+		<p class="homePageText" id="mainText" >
+			welcome to <b>neutral.</b> the most lightweight and stripped down version of a todo list app you can find. <br><br>
+			most todo apps have beautiful user interfaces and have a ton of features. i absolutely love that but i think it’s quite
+			unproductive if a user gets distracted when they just want to come in, type what they need, look at their tasks and leave immediately.
+			this is an app that i have built based on my specific requirements and nothing more. i feel this is perfectly geared towards students
+			and power users that just want to get things done very efficiently without having to setup much. <br><br>
+			designed with keyboard usage in mind so you’ll basically never have to touch the mouse and has a very low-key yet tasteful user interface.
+		</p>
+		
+		
+		<button id="logInButton" on:click|preventDefault={ () => {
+			console.log('login pressed')
+		}  }>log in</button>
+		
+		
+		
+		<div id="bottomElements">
+			<p class="homePageText" >use in your browser by logging in here or download the android or windows app.</p>
+			<p id="bottomElementsCredit" class="homePageText">made by translate</p>
+		</div>
+		
+	</section>
 	
-							code2: 'Enter',
-							callback2: () => {
-								showSubText = 'block'
-							},
 	
-							code4: 'Backspace',
-							callback4: () => {
-								if (todo === '') {
-									removeTodo(index)
-								}
-							},
-							shift: true,
-							callback5: () => {
-								todo = todo + '\n'
-							},
-	
-							todo: todo
-	
-						}} on:input={autoGrow}></textarea>
-					</div>
+	<section id="whenSignedIn" style="display: {whenSignedInDisplay};">
+		
+		<div id="leftSide">
+			{#each todos as {todo, completed, subtext, showSubText}, index}
+			
+			<div class="todoAndCheckBox">
+				<label class="checkBoxContainer">
+					<input class="checkBox" type="checkbox" bind:checked={completed}
 					
+					value=true>
+					<span class="checkBoxIndicator"></span>
+				</label>
+				<!-- svelte-ignore a11y-autofocus -->
+				<textarea class="todos" autofocus type="text" bind:this={todos.input} bind:value={todo} use:shortcut={{
 					
+					control: true,
+					code: 'KeyD',
+					callback: () => removeTodo(index),
 					
-					<textarea
-					on:input={autoGrow}
+					code2: 'Enter',
+					callback2: () => {
+						showSubText = 'block'
+					},
 					
-					class="subText"
-					type="text"
-					bind:value={subtext}
-					placeholder="subtext"
-					style="display: {showSubText}"
-					
-					use:shortcut={{
-						code3: 'Backspace',
-						callback3: () => {
-							if (subtext === '') {
-								showSubText = 'none';
-							}
-						},
-						subtext: subtext
-					}} wrap="hard"></textarea>
-					
-					
-					
-					<br>
-					
-					
-					
-					
-					{/each}
-				</div>
-				
-				
-				<div id="rightSide" style=" display: {showUserName} "  >
-					
-					<a href="/" on:click|preventDefault={ () => {
-						if (showMenuItems == 'none') {
-							showMenuItems = 'flex'
+					code4: 'Backspace',
+					callback4: () => {
+						if (todo === '') {
+							removeTodo(index)
 						}
-						else if (showMenuItems == 'flex') {
-							showMenuItems = 'none'
-						}
-						
-					} }>
-					<p class="homePageText" id="displayName" style="color: #B0B0B0; text-align: right"> {displayName} </p>
-				</a>
-				
-				
-				
-				<div id="menuItems" style="display: {showMenuItems};">
+					},
+					shift: true,
+					callback5: () => {
+						todo = todo + '\n'
+					},
 					
-					<a href="/" on:click|preventDefault={ () => {
-						if (showShortcuts == 'none') {
-							showShortcuts = 'flex'
-						}
-						else if (showShortcuts == 'flex') {
-							showShortcuts = 'none'
-						}
-					}}>
-					<p class="homePageText" > shortcuts </p>
-				</a>
-				
-				<div id="shortcutsMenu" style="display: {showShortcuts};">
-					<p style="line-height: 1.7em">
-						ctrl + space to create new task <br>
-						shift + enter on a task to create new line <br>
-						press enter on selected task to add sub text <br>
-						hold ctrl to drag block <br> <br>
-						ctrl + d to delete selected block <br>
-						ctrl + o to hide sidebar (remember this tho)<br>
-						ctrl + b to blur screen <br>
-						ctrl + m to dark mode <br>
-					</p>
-				</div>
-				
-				<a href="/" on:click={signOutButton}>
-					<p class="homePageText" > sign out </p>
-				</a>
-				
-				
-				
-				
-				
-				
+					todo: todo
+					
+				}} on:input={autoGrow}></textarea>
 			</div>
 			
 			
+			
+			<textarea
+			on:input={autoGrow}
+			
+			class="subText"
+			type="text"
+			bind:value={subtext}
+			placeholder="subtext"
+			style="display: {showSubText}"
+			
+			use:shortcut={{
+				code3: 'Backspace',
+				callback3: () => {
+					if (subtext === '') {
+						showSubText = 'none';
+					}
+				},
+				subtext: subtext
+			}} wrap="hard"></textarea>
+			
+			
+			
+			<br>
+			
+			
+			
+			
+			{/each}
 		</div>
-	</section>
+		
+		
+		<div id="rightSide" style=" display: {showUserName} "  >
+			
+			<a href="/" on:click|preventDefault={ () => {
+				if (showMenuItems == 'none') {
+					showMenuItems = 'flex'
+				}
+				else if (showMenuItems == 'flex') {
+					showMenuItems = 'none'
+				}
+				
+			} }>
+			<p class="homePageText" id="displayName" style="color: #B0B0B0; text-align: right"> {displayName} </p>
+		</a>
+		
+		
+		
+		<div id="menuItems" style="display: {showMenuItems};">
+			
+			<a href="/" on:click|preventDefault={ () => {
+				if (showShortcuts == 'none') {
+					showShortcuts = 'flex'
+				}
+				else if (showShortcuts == 'flex') {
+					showShortcuts = 'none'
+				}
+			}}>
+			<p class="homePageText" > shortcuts </p>
+		</a>
+		
+		<div id="shortcutsMenu" style="display: {showShortcuts};">
+			<p style="line-height: 1.7em">
+				ctrl + space to create new task <br>
+				shift + enter on a task to create new line <br>
+				press enter on selected task to add sub text <br>
+				hold ctrl to drag block <br> <br>
+				ctrl + d to delete selected block <br>
+				ctrl + o to hide sidebar (remember this tho)<br>
+				ctrl + b to blur screen <br>
+				ctrl + m to dark mode <br>
+			</p>
+		</div>
+		
+		<a href="/" on:click={ () => {
+			console.log('signout clicked' )
+		} }>
+		<p class="homePageText" > sign out </p>
+	</a>
+	
+	
+	
+	
+	
+	
+</div>
+
+
+</div>
+</section>
 </main>
 
 

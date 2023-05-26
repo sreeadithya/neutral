@@ -19,6 +19,8 @@
     "svelte": "^3.55.0"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.22.0",
+    "appwrite": "^11.0.0",
     "firebase": "^9.22.0",
     "rxfire": "^6.0.3",
     "rxjs": "^7.8.1",

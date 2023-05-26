@@ -25,6 +25,7 @@
     "rxfire": "^6.0.3",
     "rxjs": "^7.8.1",
     "sirv-cli": "^2.0.0",
-    "sveltefire": "^0.2.3"
+    "sveltefire": "^0.2.3",
+    "uuid": "^9.0.0"
   }
 }

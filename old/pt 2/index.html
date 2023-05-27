@@ -44,7 +44,7 @@
   </section>
   
   
-  <section x-data="{ todos: [], userInput: ''}" id="whenSignedIn" style="display: none;">
+  <section x-data="{ todos: [], userInput: ''}" id="whenSignedIn" style="display: flex;">
     
     <div id="userDetails">
     </div>
@@ -150,7 +150,7 @@ auth.onAuthStateChanged(user => {
 if (user) {
     var userLoggedIn = true;
     console.log(userLoggedIn)
-    document.getElementById('whenSignedOut').style.display = 'none'
+    document.getElementById('whenSignedOut').style.display = 'flex'
     document.getElementById('whenSignedIn').style.display = 'block'
 
 
@@ -161,7 +161,7 @@ else {
     var userLoggedIn = false;
     console.log(userLoggedIn)
     document.getElementById('whenSignedOut').style.display = 'flex'
-    document.getElementById('whenSignedIn').style.display = 'none'
+    document.getElementById('whenSignedIn').style.display = 'block'
 
 }
 });

@@ -17,11 +17,15 @@
     "rollup-plugin-css-only": "^4.3.0",
     "rollup-plugin-livereload": "^2.0.0",
     "rollup-plugin-svelte": "^7.1.2",
-    "svelte": "^3.55.0"
+    "svelte": "^3.55.0",
+    "svelte-focus-key": "^0.3.2"
   },
   "dependencies": {
+    "@alpinejs/focus": "^3.12.1",
     "@supabase/supabase-js": "^2.22.0",
+    "alpinejs": "^3.12.1",
     "appwrite": "^11.0.0",
+    "autosize": "^6.0.1",
     "firebase": "^9.22.0",
     "rxfire": "^6.0.3",
     "rxjs": "^7.8.1",

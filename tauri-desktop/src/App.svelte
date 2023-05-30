@@ -2,13 +2,12 @@
 	import { initializeApp } from "firebase/app";
 	import {
 		getAuth,
-		signInWithPopup,
-		GoogleAuthProvider } from "firebase/auth";
-		
-		import { getPerformance } from "firebase/performance";
+		signInWithRedirect,
+		GoogleAuthProvider } from "firebase/auth";		
 		
 		import { shortcut } from "./misc.js"
-		import { onMount } from 'svelte';
+		import { onMount, afterUpdate } from 'svelte';
+		let element
 		
 		import { getDatabase, ref, set, get, child } from "firebase/database";
 		
@@ -23,18 +22,45 @@
 			databaseURL: "https://neutral-fd231-default-rtdb.firebaseio.com/"
 		};
 		
+		const checkOnlineStatus = async () => {
+			try {
+				const online = await fetch("/1pixel.png");
+				return online.status >= 200 && online.status < 300;
+			} catch (err) {
+				return false;
+			}
+		}; 
+		
+		let connectedStatus = 'none'
+
+		setInterval(async () => {
+			const result = await checkOnlineStatus();
+			connectedStatus = result ? 'none' : 'block'
+		}, 10000);
+		
+		window.addEventListener("load", async (event) => {
+			connectedStatus = (await checkOnlineStatus())
+			? 'none'
+			: 'block';
+			
+		});
+		
+		
+		
+		
+		
+		
 		const app = initializeApp(firebaseConfig);
 		
 		let unsubscribe
 		const auth = getAuth(app)
 		const provider = new GoogleAuthProvider(app);
 		const user = auth.currentUser;
-		const perf = getPerformance(app);
 		
 		const db = getDatabase();
 		
 		
-		
+	
 		
 		let userId = null;
 		let displayName
@@ -46,6 +72,13 @@
 		let showMenuItems = 'none'
 		let showShortcuts = 'none'
 		
+		let userInput = ''
+		let showInputField = 'none';
+		let focusInputField = false
+		let inputRef;		
+		
+		let todoHeight = '23px'
+		let subTextHeight = '20px'
 		
 		function getWelcomeText() {
 			const now = new Date();
@@ -62,9 +95,55 @@
 			}
 		}
 		
+		let todoHeightUpdated
+		let subTextHeightUpdated
 		
-		let showUserName = 'block'
-		showUserName = JSON.parse(localStorage.getItem('showUserName'))
+		function updateTodoHeight(event, index) {
+			
+			let el = event.target
+			
+			el.style.height = "1px";
+			
+			todoHeightUpdated = (5+el.scrollHeight)+"px";
+			
+			
+			console.log(todoHeightUpdated)
+			
+			
+			todos[index].todoHeight = todoHeightUpdated
+			
+			writeUserData()
+			
+		}
+		
+		function updateSubTextHeight(event, index) {
+			
+			let el = event.target
+			
+			el.style.height = "1px";
+			
+			subTextHeightUpdated = (5+el.scrollHeight)+"px";
+			
+			
+			console.log(subTextHeightUpdated)
+			
+			
+			todos[index].subTextHeight = subTextHeightUpdated
+			
+			writeUserData()
+			
+		}
+		
+		
+		
+		var showUserNameStorage = JSON.parse(localStorage.getItem('showUserName'))
+		let showUserName
+		if (showUserNameStorage == 'none') {
+			showUserName = 'none'
+		}
+		else {
+			showUserName = 'block'
+		}
 		
 		var isDarkModeStorage = JSON.parse(localStorage.getItem('isDarkModeStorage'))
 		let isDarkMode
@@ -108,7 +187,7 @@
 		
 		
 		function logInButton() {
-			signInWithPopup(auth, provider)
+			signInWithRedirect(auth, provider)
 			.then((result) => {
 				whenSignedOutDisplay = 'none'
 				whenSignedInDisplay = 'flex'
@@ -166,17 +245,8 @@
 		
 		
 		
-		
-		
-		
-		
-		function addTodo() {
-			todos = [{todo:'', completed: false, subtext: '', showSubText: 'none'}, ...todos]
-			writeUserData()
-		}
-		
-		
 		function removeTodo(index) {
+			console.log('removed')
 			todos = [...todos.slice(0, index), ...todos.slice(index+1)]
 			writeUserData()
 		}
@@ -187,30 +257,21 @@
 		
 		
 		
-		function autoGrow(event) {
+		
+		function autoGrowSubText(event) {
 			const element = event.target;
 			element.style.height = '5px';
 			element.style.height = element.scrollHeight + 'px';
+			console.log(element.style.height)
 		}
-		
-		
-		
-		onMount(() => {
-			
-			
-			document.addEventListener('keydown', handleKeyDown);
-			return () => {
-				document.removeEventListener('keydown', handleKeyDown);
-			};
-			
-		});
 		
 		function handleKeyDown(event) {
 			if (event.ctrlKey && event.code === 'Space') {
-				addTodo();
+				focusInputField = true
+				showInputField = 'block'
 			}
 			
-			if (event.ctrlKey && event.code === 'KeyO') {
+			if (event.ctrlKey && event.code === 'KeyU') {
 				event.preventDefault()
 				if (showUserName == 'block') {
 					showUserName = 'none'	
@@ -249,18 +310,29 @@
 				event.preventDefault()
 				console.log(todos)
 				
-				
 			}
 			
 			
 		}
 		
+		onMount(() => {
+			
+			
+			document.addEventListener('keydown', handleKeyDown);
+			return () => {
+				document.removeEventListener('keydown', handleKeyDown);
+			};
+			
+			
+		});
 		
-		
-		
-		
-		
-		
+		afterUpdate(() => {
+			if (focusInputField) {
+				inputRef.focus();
+				focusInputField = false;
+			}
+			
+		});
 		
 		
 	</script>
@@ -269,22 +341,22 @@
 		<section id="whenSignedOut" style="display: {whenSignedOutDisplay};">
 			<span class="homePageText">{getWelcomeText()}</span>
 			<p class="homePageText" id="mainText" >
-				welcome to <b>neutral.</b> the most lightweight and stripped down version of a todo list app you can find. <br><br>
-				most todo apps have beautiful user interfaces and have a ton of features. i absolutely love that but i think it’s quite
-				unproductive if a user gets distracted when they just want to come in, type what they need, look at their tasks and leave immediately.
-				this is an app that i have built based on my specific requirements and nothing more. i feel this is perfectly geared towards students
-				and power users that just want to get things done very efficiently without having to setup much. <br><br>
-				designed with keyboard usage in mind so you’ll basically never have to touch the mouse and has a very low-key yet tasteful user interface.
+				welcome to <b>neutral.</b>
 			</p>
 			
 			
-			<button id="logInButton" on:click|preventDefault={logInButton}>log in</button>
+			<button class="defaultButton" on:click|preventDefault={logInButton}>log in</button>
 			
 			
 			
-			<div id="bottomElements">
-				<p class="homePageText" >use in your browser by logging in here or download the android or windows app.</p>
-				<p id="bottomElementsCredit" class="homePageText">made by translate</p>
+			<div class="bottomElements">
+				
+				<div style="display: flex; flex-direction: column">
+					<p class="homePageText"> <a href="https://neutral.adithya.work/" target="_blank"><u>visit the website</u></a>  </p>
+				</div>
+				
+				
+				<p class="bottomElementsCredit" >  made by <u> <a href="https://github.com/sreeadithya" target="_blank">translate</a></u> </p>
 			</div>
 			
 		</section>
@@ -293,148 +365,194 @@
 		<section id="whenSignedIn" style="display: {whenSignedInDisplay};">
 			
 			<div id="leftSide">
-				{#each todos as {todo, completed, subtext, showSubText}, index}
-				
-				<div class="todoAndCheckBox">
-					<label class="checkBoxContainer">
-						<input class="checkBox" type="checkbox" bind:checked={completed} on:input={writeUserData}
+				<form on:submit|preventDefault={ () => { 
+					if(userInput.trim().length) todos = [{todo:userInput, completed: false, subtext: '', showSubText: 'none'}, ...todos];
+					userInput = '';  showInputField = 'none'; document.getElementById('inputArea').style.display='block'; writeUserData();
+				} }
+				id="inputArea" style="display: {showInputField};" autocomplete="off" spellcheck="false" >
+				<input type="text" bind:value={userInput} id="todoInputArea" bind:this={inputRef}>
+			</form>
 			
-						
-						
-						value=true>
-						<span class="checkBoxIndicator"></span>
-					</label>					
-					<textarea class="todos" on:input={writeUserData} type="text" bind:value={todo} class:completedTodo={completed} use:shortcut={{
-						
-						control: true,
-						code: 'KeyD',
-						callback: () => removeTodo(index),
-						
-						code2: 'Enter',
-						callback2: () => {
-							showSubText = 'block'
-							writeUserData()
-						},
-						
-						code4: 'Backspace',
-						callback4: () => {
-							if (todo === '') {
-								removeTodo(index)
-							}
-						},
-						shift: true,
-						callback5: () => {
-							todo = todo + '\n'
-							writeUserData
-						},
-
-						code6: 'KeyC',
-							callback6: () => {
-								console.log('lmao')
-								completed=!completed
-								
-								writeUserData()
-							},
-							
-						
-						todo: todo
-						
-					}} on:input={autoGrow}></textarea>
-				</div>
-				
-				
-				
-				<textarea
-				on:input={autoGrow}
-				class="subText"
-				class:completedSubText={completed}
+			{#each todos as {todo, completed, subtext, showSubText, todoHeight, subTextHeight}, index}
+			
+			<div class="todoAndCheckBox">
+				<label class="checkBoxContainer">
+					<input class="checkBox" type="checkbox" bind:checked={completed} on:input={writeUserData}
+					
+					
+					spellcheck="false" 
+					value=true>
+					
+					<span class="checkBoxIndicator"></span>
+					
+					
+					
+				</label>					
+				<textarea   class="todos"
+				bind:value={todo}
+				on:input={ event => {
+					updateTodoHeight(event, index)
+				} }
 				type="text"
-				bind:value={subtext}
-				placeholder="_"
-				style="display: {showSubText}"
-				on:input={writeUserData}
-				use:shortcut={{
-					code3: 'Backspace',
-					callback3: () => {
-						if (subtext === '') {
-							showSubText = 'none';
+				class:completedTodo={completed}
+				style="height: {todoHeight}"
+				spellcheck="false" use:shortcut={{
+					
+					control: true,
+					code: 'KeyD',
+					callback: () => removeTodo(index),
+					
+					code2: 'Enter',
+					callback2: () => {
+						showSubText = 'block'
+						writeUserData()
+					},
+					
+					code4: 'Backspace',
+					callback4: () => {
+						
+						if (todos[index].todo == "") {
+							removeTodo(index)
 						}
 					},
-					subtext: subtext,
+					
+					shift: true,
+					callback5: () => {
+						todo = todo + '\n'
+					},
+					code6: 'KeyC',
+					callback6: () => {
+						completed=!completed
+						
+						writeUserData()
+					},
+					
+					
+					todo: todo
+					
 				}}></textarea>
 				
 				
 				
-				<br>
-				
-				
-				
-				
-				{/each}
 			</div>
 			
 			
-			<div id="rightSide" style=" display: {showUserName} "   >
+			
+			<textarea
+			spellcheck="false" 
+			
+			class="subText"
+			class:completedSubText={completed}
+			type="text"
+			bind:value={subtext}
+			placeholder=""
+			on:input={ event => {
+				updateSubTextHeight(event, index)
+			} }
+			style="display: {showSubText}; height: {subTextHeight}; min-height: 23px;"
+			on:input={writeUserData}
+			use:shortcut={{
+				code3: 'Backspace',
+				callback3: () => {
+					if (subtext == '') {
+						showSubText = 'none';
+						writeUserData()
+					}
+				},
 				
-				<a href="/" on:click|preventDefault={ () => {
-					if (showMenuItems == 'none') {
-						showMenuItems = 'flex'
-					}
-					else if (showMenuItems == 'flex') {
-						showMenuItems = 'none'
-					}
-					
-				} }>
-				<p class="homePageText" id="displayName" style="color: #B0B0B0; text-align: right"> {displayName} </p>
-			</a>
-			
-			
-			
-			<div id="menuItems" style="display: {showMenuItems};">
 				
-				<a href="/" on:click|preventDefault={ () => {
-					if (showShortcuts == 'none') {
-						showShortcuts = 'flex'
-					}
-					else if (showShortcuts == 'flex') {
-						showShortcuts = 'none'
-					}
-				}}>
-				<p class="homePageText" > how to use </p>
-			</a>
+				control: true,
+				code7: 'KeyD',
+				callback7: () => {
+					subtext = "";
+					showSubText = 'none';
+					writeUserData()
+				},
+				code6: 'KeyC',
+					callback6: () => {
+						completed=!completed
+						
+						writeUserData()
+					},
+				
+				
+				
+				
+				subtext: subtext,
+			}}></textarea>
 			
-			<div id="shortcutsMenu" style="display: {showShortcuts};">
-				<p style="line-height: 1.7em">
-					<i> get started: </i>  <br>
-					ctrl + space to create new task <br>
-					shift + enter to create new line <br>
-					press enter on task to add sub text <br>
-					hold ctrl to drag block <br> <br>
-					<i> remember these:</i>  <br>
-					ctrl + c to check selected <br>
-					ctrl + d to delete selected <br>
-					ctrl + o to hide sidebar (imp)<br>
-					ctrl + b to blur screen <br>
-					ctrl + k for dark mode <br>  <br>
-
-					<i> made by <a href="https://github.com/sreeadithya" target="_blank"> <u>translate</u>  </a> </i>  <br>
-					<i> <a href="https://ko-fi.com/translate" target="_blank"> <u>buy me a coffee</u> </a></i> 
-				</p>
-			</div>
 			
-			<a href="/" on:click={signOutButton}>
-				<p class="homePageText" > sign out </p>
-			</a>
+			
+			<br>
 			
 			
 			
 			
-			
-			
+			{/each}
 		</div>
 		
 		
+		<div id="rightSide" style=" display: {showUserName}; "   >
+			
+			<a href="/" on:click|preventDefault={ () => {
+				if (showMenuItems == 'none') {
+					showMenuItems = 'flex'
+				}
+				else if (showMenuItems == 'flex') {
+					showMenuItems = 'none'
+				}
+				
+			} }>
+			<p class="homePageText" id="displayName" style="color: #B0B0B0; text-align: right"> {displayName} </p>
+			
+			
+			</a>
+		
+		
+		
+		<div id="menuItems" style="display: {showMenuItems};">
+			
+			<a href="/" on:click|preventDefault={ () => {
+				if (showShortcuts == 'none') {
+					showShortcuts = 'flex'
+				}
+				else if (showShortcuts == 'flex') {
+					showShortcuts = 'none'
+				}
+			}}>
+			<p class="homePageText" > how to use </p>
+		</a>
+		
+		<div id="shortcutsMenu" style="display: {showShortcuts};">
+			<p style="line-height: 1.7em">
+				<i> get started: </i>  <br>
+				ctrl + space to create new task <br>
+				hit enter on task to add sub text <br>
+				tab to move around <br>
+				shift + enter to add new line <br> <br>
+				<i> remember these:</i>  <br>
+				ctrl + c to mark done<br>
+				ctrl + d to delete<br>
+				ctrl + u to hide username<br>
+				ctrl + b to blur screen <br>
+				ctrl + k for dark mode <br>  <br>
+				
+				<i> made by <a href="https://github.com/sreeadithya" target="_blank"> <u>translate</u>  </a> </i>  <br>
+				<i> <a href="https://ko-fi.com/translate" target="_blank"> <u>buy me a coffee</u> </a></i> 
+			</p>
+		</div>
+		
+		<a href="/" on:click={signOutButton} >
+			<p class="homePageText" > sign out </p>
+		</a>
+		
+		
+		
 	</div>
+	
+	<p class="homePageText" style="color: #B0B0B0; text-align: right; padding-top: 70vh; display: {connectedStatus}"> internet connection lost </p>
+
+</div>
 </section>
 </main>
 
@@ -451,8 +569,9 @@
 		font-size: 18px;
 		font-family: Helvetica, Arial, sans-serif;
 		margin: 5%;
+		margin-top: 7%;
 	}
-
+	
 	
 	:global(body) {
 		background-color: #FFFFFF;
@@ -464,9 +583,13 @@
 		color: #FFFFFF;
 	}
 	
-	:global(body.darkMode) #logInButton {
+	:global(body.darkMode) .defaultButton {
 		background-color: #121212;
 		color: #FFFFFF;
+	}
+	
+	:global(body.darkMode) #rightSide {
+		background-color: #121212;
 	}
 	
 	:global(body.darkMode) #shortcutsMenu {
@@ -485,42 +608,42 @@
 		accent-color: #FFFFFF;
 		
 	}
-
+	
 	:global(body.darkMode) .completedTodo {
 		margin: 0px;
 		padding-top: 0px;
 		padding-bottom: 2px;
 		color: #FFFFFF80;
 	}
-
+	
 	:global(body.darkMode) .completedSubText {
 		padding-bottom: 0px;
 		margin: 0px;
 		margin-left: 50px;
-		color: #B0B0B0;
+		color: #FFFFFF80;
 	}
-
-
-
+	
+	
+	
 	:global(body.darkMode) .checkBoxContainer input:checked ~ .checkBoxIndicator {
 		color: #FFFFFF;
 		
 		
 	}
-		.completedTodo {
+	.completedTodo {
 		margin: 0px;
 		padding-top: 0px;
 		padding-bottom: 2px;
 		color: #B0B0B0;
 	}
-
+	
 	.completedSubText {
 		padding-bottom: 0px;
 		margin: 0px;
 		margin-left: 50px;
 		color: #B0B0B0;
 	}
-
+	
 	
 	
 	
@@ -571,9 +694,10 @@
 	
 	textarea {
 		color: #000000;
+		overflow-y: hidden;
 	}
 	
-	#logInButton {
+	.defaultButton {
 		
 		outline: none;
 		border-color: #B0B0B0;
@@ -583,9 +707,10 @@
 		max-width: 80px;
 		cursor: pointer;
 		background-color: #FFFFFF;
-		margin-top: 10vh;
+		margin-top: 7vh;
 		color: #000000;
-		
+		padding-left: 0.9em;
+		padding-right: 0.9em;
 		
 	}
 	
@@ -615,13 +740,16 @@
 		
 		padding: 0px;
 		margin: 0px;
-
+		position: absolute;
+		right: 0;
+		z-index: 10;
+		background-color: #FFFFFF;
 		
 	}
-
+	
 	#rightSide:hover {
-	  display: block;
-
+		display: block;
+		
 	}
 	
 	
@@ -635,15 +763,18 @@
 		align-items: flex-start;
 		margin: 0px;
 		padding: 0px;
+		
 	}
 	
 	
 	
 	
 	#mainText {
-		padding-top: 10vh;
+		padding-top: 5vh;
 		width: 70vw;
 	}
+	
+	
 	
 	.todos {
 		margin: 0px;
@@ -657,27 +788,80 @@
 		padding-bottom: 2px;
 		color: #B0B0B0;
 	}
-
+	
 	.completedSubText {
 		padding-bottom: 0px;
 		margin: 0px;
 		margin-left: 50px;
 		color: #B0B0B0;
 	}
-
+	
 	.subText {
 		padding-bottom: 0px;
 		margin: 0px;
 		margin-left: 50px;
 	}
 	
-	#bottomElements {
-		padding-top: 25vh;
+	.bottomElements {
+
+		padding-top: 40vh;
+		padding-bottom: 10vh;
 		display: flex;
 		flex-flow: row wrap;
 		justify-content: space-between;
+		height: 100%;
+		bottom: 0;
+		
 	}
 	
+	
+	.bottomElementsCredit {
+		display: inline-block;
+		align-self: flex-end;
+	}
+	
+	
+	@media screen and (max-width: 850px) {
+		.bottomElements {
+			padding-top: 6vh;
+			flex-direction: column;
+		}
+		.defaultButton {
+			margin-top: 6vh;
+		}
+		.bottomElements {
+			padding-top: 20vh;
+			flex-direction: column;
+			align-items: flex-start;
+		}
+		.bottomElementsCredit {
+			align-self: flex-start;
+		}
+
+		
+
+	}
+	
+
+	@media screen and (max-height: 600px) {
+		.bottomElements {
+			padding-top: 6vh;
+		}
+		.defaultButton {
+			margin-top: 6vh;
+		}
+
+		/* .bottomElementsCredit {
+		}
+		#backButton {
+		} */
+
+		.bottomElements {
+			padding-top: 20vh;
+		}
+
+	}
+
 	
 	#displayName {
 		padding: 0px;
@@ -730,5 +914,7 @@
 		display: flex;
 		flex-direction: column;
 	}
+	
+	
 	
 </style>

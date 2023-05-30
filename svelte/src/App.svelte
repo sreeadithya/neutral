@@ -410,7 +410,7 @@
 			</div>
 			
 			
-			<p class="bottomElementsCredit" >  made by <u> <a href="https://github.com/sreeadithya" target="_blank">translate</a></u> </p>
+			<p class="bottomElementsCredit" >  made by <u> <a href="https://translate.lol/" target="_blank">translate</a></u> </p>
 		</div>
 		
 	</section>
@@ -433,7 +433,7 @@
 			}} class='defaultButton' id="backButton"> back </button>
 			
 			<p class="bottomElementsCredit" style="padding-bottom: 0px; margin-bottom: 0px;">
-				made by <u> <a href="https://github.com/sreeadithya" target="_blank">translate</a></u> <br>
+				made by <u> <a href="https://translate.lol/" target="_blank">translate</a></u> <br>
 				<a href="https://ko-fi.com/translate" target="_blank"> <u>buy me a coffee</u> </a>
 			</p>
 			
@@ -598,7 +598,7 @@
 			ctrl + p to hide checkboxes <br> <br>
 
 			
-			<i> made by <a href="https://github.com/sreeadithya" target="_blank"> <u>translate</u>  </a> </i>  <br>
+			<i> made by <a href="https://translate.lol/" target="_blank"> <u>translate</u>  </a> </i>  <br>
 			<i> <a href="https://ko-fi.com/translate" target="_blank"> <u>buy me a coffee</u> </a></i> 
 		</p>
 	</div>

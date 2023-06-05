@@ -77,13 +77,22 @@
 	}
 	
 	var showCheckBoxesStorage = JSON.parse(localStorage.getItem('showCheckBoxesStorage'))		
-	if (showCheckBoxesStorage == 'block') {
-		showCheckBoxes = 'block'
-		showCheckBoxesBool = true
-	}
-	else {
+	if (showCheckBoxesStorage == 'none') {
 		showCheckBoxes = 'none'
 		showCheckBoxesBool = false
+		localStorage.setItem("showCheckBoxesStorage", JSON.stringify(showCheckBoxes))
+
+	}
+	else if (showCheckBoxesStorage == 'block') {
+		showCheckBoxes = 'block'
+		showCheckBoxesBool = true
+		localStorage.setItem("showCheckBoxesStorage", JSON.stringify(showCheckBoxes))
+
+	}
+	else {
+		showCheckBoxes = 'block'
+		localStorage.setItem("showCheckBoxesStorage", JSON.stringify(showCheckBoxes))
+
 	}
 	
 	

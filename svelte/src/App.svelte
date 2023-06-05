@@ -106,13 +106,22 @@
 	}
 
 	var showCheckBoxesStorage = JSON.parse(localStorage.getItem('showCheckBoxesStorage'))		
-	if (showCheckBoxesStorage == 'block') {
-		showCheckBoxes = 'block'
-		showCheckBoxesBool = true
-	}
-	else {
+	if (showCheckBoxesStorage == 'none') {
 		showCheckBoxes = 'none'
 		showCheckBoxesBool = false
+		localStorage.setItem("showCheckBoxesStorage", JSON.stringify(showCheckBoxes))
+
+	}
+	else if (showCheckBoxesStorage == 'block') {
+		showCheckBoxes = 'block'
+		showCheckBoxesBool = true
+		localStorage.setItem("showCheckBoxesStorage", JSON.stringify(showCheckBoxes))
+
+	}
+	else {
+		showCheckBoxes = 'block'
+		localStorage.setItem("showCheckBoxesStorage", JSON.stringify(showCheckBoxes))
+
 	}
 	
 	
@@ -393,9 +402,9 @@
 					<p class="homePageText" style="display: {displayWebElementsText}"> use in your browser by logging in or <a on:click|preventDefault={showDownloadsToggle} href="/"><u>download for windows</u></a>  </p>
 					<div style="display: {showDownloads};" id="showDownloadsBox">
 						
-						<button style="display: {showDownloads}; margin-bottom: 10px" class="downloadButton" > <a href="https://github.com/sreeadithya/neutral/releases/download/1.0.0/neutral.1.0.0.installer.msi" target="_blank">installer (3mb)</a>  </button>
+						<button style="display: {showDownloads}; margin-bottom: 10px" class="downloadButton" > <a href="https://github.com/sreeadithya/neutral/releases/download/1.0.1/neutral.1.0.1.msi" target="_blank">installer (3mb)</a>  </button>
 						
-						<button style="display: {showDownloads};" class="downloadButton"> <a href="https://github.com/sreeadithya/neutral/releases/download/1.0.0/neutral.1.0.0.exe" target="_blank">portable (7mb)</a>  </button>
+						<button style="display: {showDownloads};" class="downloadButton"> <a href="https://github.com/sreeadithya/neutral/releases/download/1.0.1/neutral.1.0.1.exe" target="_blank">portable (7mb)</a>  </button>
 					</div>
 				</div>
 				

@@ -1,6 +1,2 @@
-- indication when user starts subtext
-- log in button redesign
-- home page redesign for better conversion
 - drag and drop
 - make todos order back to normal
-- when shift + enter add \n so that next line is visually shown

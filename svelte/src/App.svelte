@@ -435,24 +435,26 @@
 
               <div style="padding: 0px 20px 0px 20px">
                 <button
-                  style="display: {showDownloads}; margin-bottom: 10px; margin-top:15px"
-                  class="downloadButton"
+                  class="defaultButton"
+                  on:click|preventDefault={() =>
+                    window.open(
+                      "https://github.com/sreeadithya/neutral/releases/download/1.1.0/neutral.1.1.0.msi",
+                      "_blank"
+                    )}
+                  style="display: {showDownloads};margin-top:15px; padding-left:10px; padding-right:10px"
+                  >installer (3mb)</button
                 >
-                  <a
-                    href="https://github.com/sreeadithya/neutral/releases/download/1.1.0/neutral.1.1.0.msi"
-                    target="_blank">installer (3mb)</a
-                  >
-                </button>
 
                 <button
-                  style="display: {showDownloads};"
-                  class="downloadButton"
+                  class="defaultButton"
+                  on:click|preventDefault={() =>
+                    window.open(
+                      "https://github.com/sreeadithya/neutral/releases/download/1.1.0/neutral.1.1.0.exe",
+                      "_blank"
+                    )}
+                  style="display: {showDownloads}; margin-top:15px; padding-left:8px; padding-right:8px"
+                  >portable (7mb)</button
                 >
-                  <a
-                    href="https://github.com/sreeadithya/neutral/releases/download/1.1.0/neutral.1.1.0.exe"
-                    target="_blank">portable (7mb)</a
-                  >
-                </button>
 
                 <br />
               </div>
@@ -793,19 +795,6 @@
   .defaultButton:active {
     background-color: #e0e0e0;
   }
-  .downloadButton {
-    margin: 0px;
-    padding-left: 0.5em;
-
-    outline: none;
-    border-color: #b0b0b0;
-    border-width: 2px;
-    border-style: solid;
-    width: 100%;
-    cursor: pointer;
-    background-color: #ffffff;
-    color: #000000;
-  }
   .todoAndCheckBox {
     display: flex;
     align-items: flex-start;
@@ -1036,10 +1025,6 @@
   }
 
   :global(body.darkMode) .defaultButton {
-    background-color: #121212;
-    color: #ffffff;
-  }
-  :global(body.darkMode) .downloadButton {
     background-color: #121212;
     color: #ffffff;
   }
